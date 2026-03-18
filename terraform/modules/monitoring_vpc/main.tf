@@ -1,4 +1,12 @@
 # ── lks-monitoring-vpc: Monitoring VPC (us-west-2 Oregon) ──
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
 
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
@@ -26,10 +34,9 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# Security Group for VPC Endpoints (Interface type requires one)
 resource "aws_security_group" "vpce" {
   name        = "lks-sg-vpce"
-  description = "Allow HTTPS inbound for VPC Interface Endpoints"
+  description = "Allow HTTPS for VPC Interface Endpoints"
   vpc_id      = aws_vpc.this.id
 
   ingress {
@@ -49,7 +56,6 @@ resource "aws_security_group" "vpce" {
 
 data "aws_region" "current" {}
 
-# VPC Endpoints — so Fargate can pull from ECR without internet
 resource "aws_vpc_endpoint" "ecr_api" {
   vpc_id              = aws_vpc.this.id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.ecr.api"

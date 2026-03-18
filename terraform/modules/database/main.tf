@@ -1,6 +1,14 @@
 # ── Database, Storage & Messaging ──────────────────────────
 
 # RDS Subnet Group
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
 resource "aws_db_subnet_group" "this" {
   name       = "lks-db-subnet-group"
   subnet_ids = var.isolated_subnet_ids

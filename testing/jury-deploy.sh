@@ -193,10 +193,14 @@ step "5" "Terraform Init, Plan & Apply"
 
 cd "$TF_DIR"
 log "terraform init..."
+# -reconfigure: handles 'Backend configuration changed' error without prompting
+# -upgrade: picks up any new provider version requirements from modules
 terraform init \
   -backend-config="bucket=$TF_STATE_BUCKET" \
   -backend-config="key=prod/terraform.tfstate" \
   -backend-config="region=us-east-1" \
+  -reconfigure \
+  -upgrade \
   -input=false 2>&1 | tee -a "$LOG_FILE"
 ok "terraform init selesai"
 
