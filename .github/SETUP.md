@@ -23,15 +23,16 @@ cd infraautomation
 
 ## What the CI/CD pipeline does
 
-The 3-job pipeline runs on every push to `main`:
+The 4-job pipeline runs on every push to `main`:
 
 | Job | What it does |
 |---|---|
 | 1 — install | Install Python dependencies, run import smoke tests |
 | 2 — build_and_push_ecr | Build Docker images for frontend + API, push to ECR us-east-1 |
 | 3 — upload_to_s3 | Upload deployment metadata JSON to S3 |
+| 4 — deploy | Terraform `init → validate → plan` (verify config only) |
 
-**Terraform is NOT part of the pipeline.** You must run `terraform apply` manually from your terminal after fixing the bugs.
+**`terraform apply` is NOT run by the pipeline.** You must run it manually from your terminal after fixing the bugs.
 
 ---
 
