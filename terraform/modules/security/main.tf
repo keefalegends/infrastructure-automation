@@ -26,6 +26,13 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   lifecycle {
     ignore_changes = [ingress, egress]
   }
@@ -43,24 +50,28 @@ resource "aws_security_group" "ecs" {
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
+
   ingress {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.alb.id]
   }
+
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
   ingress {
     from_port   = 9100
     to_port     = 9100
     protocol    = "tcp"
     cidr_blocks = [var.monitoring_vpc_cidr]
   }
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = [var.monitoring_vpc_cidr]
-  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -79,12 +90,20 @@ resource "aws_security_group" "db" {
   vpc_id      = var.vpc_id
   tags        = { Name = "lks-sg-db" }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ecs.id]
   }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ecs.id]
+  }
+
 
   lifecycle {
     ignore_changes = [ingress, egress]
@@ -103,6 +122,28 @@ resource "aws_security_group" "monitoring" {
     protocol    = "tcp"
     cidr_blocks = [var.monitoring_vpc_cidr]
   }
+
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = [var.monitoring_vpc_cidr]
+  }
+
+  ingress {
+    from_port   = 3100
+    to_port     = 3100
+    protocol    = "tcp"
+    cidr_blocks = [var.monitoring_vpc_cidr]
+  }
+
+  ingress {
+    from_port   = 9093
+    to_port     = 9093
+    protocol    = "tcp"
+    cidr_blocks = [var.monitoring_vpc_cidr]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
